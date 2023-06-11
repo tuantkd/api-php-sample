@@ -1,0 +1,9 @@
+php_flag display_errors on
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^tasks/([0-9]+)$ controllers/task.php?id=$1 [L]
+RewriteRule ^tasks/complete$ controllers/task.php?completed=Y [L]
+RewriteRule ^tasks$ controllers/task.php [L]
+RewriteRule ^tasks/page/([0-9]+)/([0-9]+)$ controllers/task.php?page=$1&per_page=$2 [L]
