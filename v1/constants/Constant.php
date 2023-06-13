@@ -4,15 +4,20 @@
         const ErrorConnectDB = "Connection database error!";
         const ErrorReqMethod = "Request method not allowed!";
         const FailedGetData = "Failed to get data!";
+        const FailedUpdateData = "Failed to update data to database - check submitted data for error!";
         const FailedInsertData = "Failed to insert data to database - check submitted data for error!";
         const FailedCreate = "Failed to create data!";
         const FailedRetrieve = "Failed to retrieve data after creation!";
         const PageNotFound = "Page not found!";
         const DeleteSuccess = "Delete Successfully";
         const CreateSuccess = "Create Successfully";
+        const UpdateSuccess = "Update Successfully";
         const InvalidContentType = "Content type header is not set to JSON";
         const InvalidReqBody = "Request body is not valid JSON";
         const InvalidReqType = "Endpoint type not supported";
+        const InvalidNoDataFields = "No data fields provided";
+        const InvalidNoDataUpdate = "No data found to update";
+        const InvalidNotUpdate = "Data not updated - given values may be the same as the stored values";
         const InvalidReqPage = "Page number cannot be blank and must be numeric!";
     }
 
