@@ -1,0 +1,333 @@
+{
+	"info": {
+		"_postman_id": "edc7bed6-6b67-43f5-a73d-ff3b53364a24",
+		"name": "PHP-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13891713"
+	},
+	"item": [
+		{
+			"name": "GetTaskById",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Test 5\",\r\n    \"description\": \"Test 5\",\r\n    \"deadline\": \"12/08/2023 12:40\",\r\n    \"completed\": \"N\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks/4",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetTaskCompleted",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks/complete",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks",
+						"complete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetTaskInCompleted",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks/incomplete",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks",
+						"incomplete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetTaskPagination",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks/page/1/4",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks",
+						"page",
+						"1",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateTask",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Test 8\",\r\n    \"description\": \"Test 8\",\r\n    \"deadline\": \"12/08/2023 12:40\",\r\n    \"completed\": \"N\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateTask",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Test update data\",\r\n    \"description\": \"Test update description\",\r\n    \"deadline\": \"23/08/2023 12:40\",\r\n    \"completed\": \"N\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/tasks/4",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"tasks",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateUsers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"fullname\": \"Nguyen Van B\",\r\n    \"username\": \"tuan\",\r\n    \"password\": \"tuan@123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/users",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreareSessions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"tuan\",\r\n    \"password\": \"tuan@123\"\r\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/sessions",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteSessionLogout",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "YzNmMTNmNGI4YTM2OWY2YmFiZTNkMjViZjhiMGRiNWU0ZDAzMmNjYzZjMDQyY2IwMTY4NjgzOTY3Nw==",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/sessions/2",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"sessions",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateSession",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Yzg5OWQ4NDg0ZmM2ZTdlOGY5NjcwNDg0ZDlkNzEwNTg5YTcxZDc4YTVjMTJmMTBlMTY4Njg0NTYyNQ==",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refresh_token\": \"MjJlN2M0N2YwOWFlNjhjNzQ3YWRjZWFkYTg1NjEyNDMzMzQ4N2I4NjgwNzUwOWQ2MTY4Njg0NTYyNQ==\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1/api-php-sample/v1/sessions/7",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"path": [
+						"api-php-sample",
+						"v1",
+						"sessions",
+						"7"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
