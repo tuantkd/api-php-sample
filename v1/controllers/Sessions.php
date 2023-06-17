@@ -29,12 +29,12 @@
             exit;
         }
 
-        if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) == 0){
+        if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1){
             $res = new Response();
             $res->setSuccess(false);
             $res->setHttpStatusCode(401);
             (!isset($_SERVER['HTTP_AUTHORIZATION']) ? $res->addMessages(SessionValidateConstant::AccessTokenMissHeader) : false);
-            (strlen($_SERVER['HTTP_AUTHORIZATION']) == 0 ? $res->addMessages(SessionValidateConstant::AccessTokenBlank) : false);
+            (isset($_SERVER['HTTP_AUTHORIZATION']) && (strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) ? $res->addMessages(SessionValidateConstant::AccessTokenBlank) : false);
             $res->send();
             exit;
         }

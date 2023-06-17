@@ -3,6 +3,7 @@
         const Error500 = "Response creation erro!";
         const ErrorConnectDB = "Connection database error!";
         const LoginIssue = "There was an issue logging in - please try again!";
+        const AuthenticatingIssue = "There was an issue Authenticating - please try again!";
         const LogoutIssue = "There was an issue logging out - please try again!";
         const ErrorReqMethod = "Request method not allowed!";
         const FailedGetData = "Failed to get data!";
@@ -63,6 +64,7 @@
         const AccessTokenMissHeader= "Access token is missing from the header!";
         const AccessTokenBlank= "Access token cannot be blank!";
         const InvalidSessionID = "Session ID cannot be blank!";
+        const InvalidAccessToken = "Invalid Access Token!";
         const SessionIDIsNumeric = "Session ID must be numeric!";
         const IncorrectLogin = "Username or password incorrect!";
         const AccessTokenNotRefresh = "Access token could not be refreshed - please login again!";
