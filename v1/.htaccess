@@ -7,12 +7,17 @@ SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^tasks/([0-9]+)$ controllers/task.php?id=$1 [L]
-RewriteRule ^tasks/complete$ controllers/task.php?completed=Y [L]
-RewriteRule ^tasks/incomplete$ controllers/task.php?completed=N [L]
-RewriteRule ^tasks$ controllers/task.php [L]
+RewriteRule ^tasks/([0-9]+)$               controllers/task.php?id=$1 [L]
+RewriteRule ^tasks/complete$               controllers/task.php?completed=Y [L]
+RewriteRule ^tasks/incomplete$             controllers/task.php?completed=N [L]
+RewriteRule ^tasks$                        controllers/task.php [L]
 RewriteRule ^tasks/page/([0-9]+)/([0-9]+)$ controllers/task.php?page=$1&per_page=$2 [L]
 
 RewriteRule ^users$ controllers/user.php [L]
-RewriteRule ^sessions$ controllers/sessions.php [L]
+
+RewriteRule ^sessions$          controllers/sessions.php [L]
 RewriteRule ^sessions/([0-9]+)$ controllers/sessions.php?session_id=$1 [L]
+
+RewriteRule ^tasks/([0-9]+)/images/([0-9]+)/attributes$ controllers/images.php?taskid=$1&imageid=$2&attributes=true [L]
+RewriteRule ^tasks/([0-9]+)/images/([0-9]+)$           controllers/images.php?taskid=$1&imageid=$2 [L]
+RewriteRule ^tasks/([0-9]+)/images$                    controllers/images.php?taskid=$1 [L]
