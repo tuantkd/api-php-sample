@@ -155,12 +155,23 @@
             $renameFilename = $this->getUploadFolderLocation().$this->getTaskId().'/'.$newFileName;
 
             if (!file_exists($originalFilename)){
-                throw new ImageException(ImageConstant::FailedRenameImage);
+                throw new ImageException(ImageConstant::ImageFileNotExists);
             }
 
             if (!rename($originalFilename, $renameFilename)){
                 throw new ImageException(ImageConstant::FailedRenameImage);
             }
+        }
+
+        public function deleteImageFile()
+        {
+            $filePath = $this->getUploadFolderLocation().$this->getTaskId().'/'.$this->getFileName();
+            if (!file_exists($filePath)){
+                if (!unlink($filePath)) {
+                    throw new ImageException(ImageConstant::FailedDeleteImage);
+                }
+            }
+            unlink($filePath);
         }
 
         public function returnImagesAsArray() 

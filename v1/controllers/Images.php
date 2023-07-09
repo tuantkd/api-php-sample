@@ -254,7 +254,7 @@
     function updateImageAttributesRoute($writeDb, $taskId, $imageId, $returnedUserId)
     {
         try {
-            if ($_SERVER['CONTENT_TYPE'] == 'application/json') {
+            if ($_SERVER['CONTENT_TYPE'] !== 'application/json') {
                 sendResponse(400, false, Constant::InvalidContentType);
             }
 
@@ -288,7 +288,7 @@
                 sendResponse(400, false, ImageConstant::NoImageFields);
             }
 
-            $writeDb->inTransaction();
+            $writeDb->beginTransaction();
             $query = $writeDb->prepare("SELECT tbl_images.id, tbl_images.title, tbl_images.filename, tbl_images.mimetype, tbl_images.task_id FROM tbl_images, tbl_task
             WHERE tbl_images.id = :imageid AND tbl_images.task_id = :taskid AND tbl_images.task_id = tbl_task.id AND tbl_task.user_id = :userid");
             $query->bindParam(':imageid', $imageId, PDO::PARAM_INT);
@@ -365,7 +365,7 @@
 
             $writeDb->commit();
 
-            sendResponse(200, true, ImageConstant::FailedNoImageUpdate, false, $imageArray);
+            sendResponse(200, true, ImageConstant::ImageUpdateSuccess, false, $imageArray);
 
         } catch (PDOException $ex) {
             error_log("Connection error - " . $ex, 0);
@@ -415,6 +415,61 @@
         }
     }
 
+    function deleteImageRoute($writeDb, $taskId, $imageId, $returnedUserId)
+    {
+        try {
+            $writeDb->beginTransaction();
+            $query = $writeDb->prepare('SELECT tbl_images.id, tbl_images.title, tbl_images.filename, tbl_images.mimetype, tbl_images.task_id FROM tbl_images, tbl_task
+            WHERE tbl_images.id = :imageid AND tbl_task.id = :taskid AND tbl_task.user_id = :userid AND tbl_images.task_id = tbl_task.id');
+            $query->bindParam(':imageid', $imageId, PDO::PARAM_INT);
+            $query->bindParam(':taskid', $taskId, PDO::PARAM_INT);
+            $query->bindParam(':userid', $returnedUserId, PDO::PARAM_INT);
+            $query->execute();
+
+            $rowCount = $query->rowCount();
+            if ($rowCount == 0) {
+                sendResponse(404, false, ImageConstant::ImageNotFound);
+            }
+
+            $image = null;
+            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $image = new ImageModel($row['id'], $row['title'], $row['filename'], $row['mimetype'], $row['task_id']);
+            }
+
+            if ($image == null) {
+                $writeDb->rollback();
+                sendResponse(500, false, ImageConstant::FailedGetImage);
+            }
+
+            $query = $writeDb->prepare('DELETE tbl_images FROM tbl_images, tbl_task
+            WHERE tbl_images.id = :imageid AND tbl_task.id = :taskid AND tbl_images.task_id = tbl_task.id AND tbl_task.user_id = :userid');
+            $query->bindParam(':imageid', $imageId, PDO::PARAM_INT);
+            $query->bindParam(':taskid', $taskId, PDO::PARAM_INT);
+            $query->bindParam(':userid', $returnedUserId, PDO::PARAM_INT);
+            $query->execute();
+
+            $rowCount = $query->rowCount();
+            if ($rowCount == 0) {
+                $writeDb->rollback();
+                sendResponse(404, false, ImageConstant::ImageNotFound);
+            }
+
+            $image->deleteImageFile();
+
+            $writeDb->commit();
+
+            sendResponse(200, true, ImageConstant::ImageDeleteSuccess);
+
+        } catch (PDOException $ex) {
+            error_log("Connection error - " . $ex, 0);
+            $writeDb->rollback();
+            sendResponse(500, false, ImageConstant::FailedDeleteImage);
+        } catch (ImageException $ex) {
+            $writeDb->rollback();
+            sendResponse(500, false, $ex->getMessage());
+        }
+    }
+
     try {
         $write = Database::connectWriteDB();
         $read = Database::connectReadDB();
@@ -454,7 +509,7 @@
         if ($_SERVER["REQUEST_METHOD"] == "GET"){
             getImageRoute($read, $taskId, $imageId, $returnedUserID);
         } else if ($_SERVER["REQUEST_METHOD"] == "DELETE"){
-
+            deleteImageRoute($write, $taskId, $imageId, $returnedUserID);
         } else {
             sendResponse(405, false, Constant::ErrorReqMethod);
         }

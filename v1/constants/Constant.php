@@ -42,6 +42,8 @@
     class ImageConstant {
         const MaxNumberID = 9223372036854775807;
         const ImageNotFound = "Image not found";
+        const ImageFileNotExists = "Image file not exists";
+        const FailedRenameImage = "Failed rename Image file";
         const ImageFileNotFound = "Image File not found";
         const ImageIDError = "Image ID Error";
         const ImageFailCreateFolder = "Failed to create image upload folder";
@@ -58,9 +60,12 @@
         const FailedImageAttribute = "Failed to get Image attributes";
         const FailedUpdateImageAttribute = "Failed to update Image attributes - check your data for errors";
         const FailedNoImageUpdate = "Failed no Image found to updated";
+        const ImageUpdateSuccess = "Image updated successfully";
+        const ImageDeleteSuccess = "Image deleted successfully";
         const NoUpdateImageAttribute = "Image attributes not updated - the given value may be the same as the stored values";
         const UpdateImageAttribute = "Image attributes update";
         const FailedGetImage = "Failed getting Image";
+        const FailedDeleteImage = "Failed deleting Image";
         const UploadImageSuccess = "Image uploaded successfully";
         const FailedRetrieveImage = "Failed to retrieve image attributes after upload - please try uploading image again";
         const ContentTypeFormData = "Content type header not set to multipart/form-data with a boundary";
