@@ -3,6 +3,24 @@
     require_once('../configs/Database.php');
     require_once('../models/Response.php');
     require_once('../models/TaskModel.php');
+    require_once('../models/ImageModel.php');
+
+    function retrieveImages($dbConn, $taskId, $returnedUserId)
+    {
+        $imageQuery = $dbConn->prepare('SELECT tbl_images.id, tbl_images.title, tbl_images.filename, tbl_images.mimetype, tbl_images.task_id FROM tbl_images, tbl_task
+        WHERE tbl_task.id = :taskid AND tbl_task.user_id = :userid AND tbl_images.task_id = tbl_task.id');
+        $imageQuery->bindParam(':taskid', $taskId, PDO::PARAM_INT);
+        $imageQuery->bindParam(':userid', $returnedUserId, PDO::PARAM_INT);
+        $imageQuery->execute();
+
+        $imageArray = array();
+        while ($row = $imageQuery->fetch(PDO::FETCH_ASSOC)) {
+            $image = new ImageModel($row['id'], $row['title'], $row['filename'], $row['mimetype'], $row['task_id']);
+            $imageArray[] = $image->returnImagesAsArray();
+        }
+
+        return $imageArray;
+    }
 
     try {
         $write = Database::connectWriteDB();
@@ -122,7 +140,8 @@
                 }
     
                 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed']);
+                    $imageArray = retrieveImages($read, $taskId, $returnedUserId);
+                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed'], $imageArray);
                     $taskArray[] = $task->taskToArray();
                 }
     
@@ -144,6 +163,13 @@
                 $res->addMessages($ex->getMessage());
                 $res->send();
                 exit;
+            } catch (ImageException $ex) {
+                $res = new Response();
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(500);
+                $res->addMessages($ex->getMessage());
+                $res->send();
+                exit;
             } catch (PDOException $ex) {
                 error_log("Database query error - " . $ex, 0);
                 $res = new Response();
@@ -155,27 +181,80 @@
             }
     
         } elseif ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-            $query = $read->prepare('DELETE FROM tbl_task WHERE id = :taskId AND user_id = :userId');
-            $query->bindParam(':taskId', $taskId, PDO::PARAM_INT);
-            $query->bindParam(':userId', $returnedUserId, PDO::PARAM_INT);
-            $query->execute();
-    
-            $rowCount = $query->rowCount();
-            if ($rowCount == 0) {
+            try {
+                $queryImage = $read->prepare('SELECT tbl_images.id, tbl_images.title, tbl_images.filename, tbl_images.mimetype, tbl_images.task_id FROM tbl_images, tbl_task
+                WHERE tbl_task.id = :taskid AND tbl_task.user_id = :userid AND tbl_images.task_id = tbl_task.id');
+                $queryImage->bindParam(':taskid', $taskId, PDO::PARAM_INT);
+                $queryImage->bindParam(':userid', $returnedUserId, PDO::PARAM_INT);
+                $queryImage->execute();
+
+                while ($row = $queryImage->fetch(PDO::FETCH_ASSOC)) {
+                    $write->beginTransaction();
+
+                    $image = new ImageModel($row['id'], $row['title'], $row['filename'], $row['mimetype'], $row['task_id']);
+                    $imageId = $image->getId();
+
+                    $query = $write->prepare('DELETE tbl_images FROM tbl_images, tbl_task
+                    WHERE tbl_images.id = :imageid AND tbl_task.id = :taskid AND tbl_images.task_id = tbl_task.id AND tbl_task.user_id = :userid');
+                    $query->bindParam(':imageid', $imageId, PDO::PARAM_INT);
+                    $query->bindParam(':taskid', $taskId, PDO::PARAM_INT);
+                    $query->bindParam(':userid', $returnedUserId, PDO::PARAM_INT);
+                    $query->execute();
+
+                    $image->deleteImageFile();
+                    $write->commit();
+                }
+
+                $query = $write->prepare('DELETE FROM tbl_task WHERE id = :taskId AND user_id = :userId');
+                $query->bindParam(':taskId', $taskId, PDO::PARAM_INT);
+                $query->bindParam(':userId', $returnedUserId, PDO::PARAM_INT);
+                $query->execute();
+        
+                $rowCount = $query->rowCount();
+                if ($rowCount == 0) {
+                    $res = new Response();
+                    $res->setSuccess(false);
+                    $res->setHttpStatusCode(404);
+                    $res->addMessages(TaskValidateConstant::NotFoundID);
+                    $res->send();
+                    exit;
+                }
+
+                $imageFolder = "../../upload_images/" . $taskId;
+                if (is_dir($imageFolder)) {
+                    rmdir($imageFolder);
+                }
+        
                 $res = new Response();
-                $res->setSuccess(false);
-                $res->setHttpStatusCode(404);
-                $res->addMessages(TaskValidateConstant::NotFoundID);
+                $res->setSuccess(true);
+                $res->setHttpStatusCode(200);
+                $res->addMessages(Constant::DeleteSuccess);
+                $res->send();
+                exit;
+
+            } catch (PDOException $ex) {
+                error_log("Connection error - " . $ex, 0);
+                if ($write->inTransaction()) {
+                    $write->rollback();
+                }
+                $res = new Response();
+                $res->setSuccess(true);
+                $res->setHttpStatusCode(200);
+                $res->addMessages(Constant::DeleteField);
+                $res->send();
+                exit;
+            } catch (ImageException $ex) {
+                if ($write->inTransaction()) {
+                    $write->rollback();
+                }
+                $res = new Response();
+                $res->setSuccess(true);
+                $res->setHttpStatusCode(500);
+                $res->addMessages($ex->getMessage());
                 $res->send();
                 exit;
             }
-    
-            $res = new Response();
-            $res->setSuccess(true);
-            $res->setHttpStatusCode(200);
-            $res->addMessages(Constant::DeleteSuccess);
-            $res->send();
-            exit;
+
         } elseif ($_SERVER["REQUEST_METHOD"] == "PATCH") {
             try {
 
@@ -255,7 +334,8 @@
                 }
 
                 while($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                    $taskDB = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed']);
+                    $imageArray = retrieveImages($write, $taskId, $returnedUserId);
+                    $taskDB = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed'], $imageArray);
                 }
 
                 $queryString = "UPDATE tbl_task SET ".$queryFields." WHERE id = :taskId AND user_id = :userId";
@@ -317,12 +397,14 @@
 
                 $taskArray = array();
                 while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                    $imageArray = retrieveImages($write, $taskId, $returnedUserId);
                     $task = new TaskModel(
                         $row['id'], 
                         $row['title'], 
                         $row['description'], 
                         $row['deadline'], 
-                        $row['completed']
+                        $row['completed'],
+                        $imageArray
                     );
                     $taskArray[] = $task->taskToArray();
                 }
@@ -343,6 +425,13 @@
                 $res = new Response();
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
+                $res->addMessages($ex->getMessage());
+                $res->send();
+                exit;
+            } catch (ImageException $ex) {
+                $res = new Response();
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(500);
                 $res->addMessages($ex->getMessage());
                 $res->send();
                 exit;
@@ -386,7 +475,8 @@
     
                 $rowCount = $query->rowCount();
                 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed']);
+                    $imageArray = retrieveImages($write, $taskId, $returnedUserId);
+                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed'], $imageArray);
                     $taskArray[] = $task->taskToArray();
                 }
     
@@ -399,6 +489,13 @@
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
                 $res->setData($returnData);
+                $res->send();
+                exit;
+            } catch (ImageException $ex) {
+                $res = new Response();
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(500);
+                $res->addMessages($ex->getMessage());
                 $res->send();
                 exit;
             } catch (TaskException $ex) {
@@ -473,7 +570,8 @@
 
                 $rowCount = $queryData->rowCount();
                 while ($row = $queryData->fetch(PDO::FETCH_ASSOC)) {
-                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed']);
+                    $imageArray = retrieveImages($write, $taskId, $returnedUserId);
+                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed'], $imageArray);
                     $taskArray[] = $task->taskToArray();
                 }
 
@@ -492,7 +590,13 @@
                 $res->setData($returnData);
                 $res->send();
                 exit;
-
+            } catch (ImageException $ex) {
+                $res = new Response();
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(500);
+                $res->addMessages($ex->getMessage());
+                $res->send();
+                exit;
             } catch (TaskException $ex) {
                 $res = new Response();
                 $res->setSuccess(false);
@@ -528,7 +632,8 @@
     
                 $rowCount = $query->rowCount();
                 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed']);
+                    $imageArray = retrieveImages($write, $taskId, $returnedUserId);
+                    $task = new TaskModel($row['id'], $row['title'], $row['description'], $row['deadline'], $row['completed'], $imageArray);
                     $taskArray[] = $task->taskToArray();
                 }
     
@@ -541,6 +646,13 @@
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
                 $res->setData($returnData);
+                $res->send();
+                exit;
+            } catch (ImageException $ex) {
+                $res = new Response();
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(500);
+                $res->addMessages($ex->getMessage());
                 $res->send();
                 exit;
             } catch (TaskException $ex) {

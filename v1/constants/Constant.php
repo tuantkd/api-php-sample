@@ -14,6 +14,7 @@
         const PageNotFound = "Page not found!";
         const LogoutMessage = "Logged out!";
         const DeleteSuccess = "Delete Successfully";
+        const DeleteField = "Field to delete";
         const CreateSuccess = "Create Successfully";
         const TokenRefresh = "Token refreshed";
         const UpdateSuccess = "Update Successfully";
@@ -34,6 +35,7 @@
         const ErrorMessageDescription = "Task Description has exceeded the text limit";
         const ErrorMessageDeadline = "Task Deadline requires format date time (d/m/y H:i)";
         const ErrorMessageCompleted = "Task Completed must be Y or N";
+        const ErrorImageNotArr = "Image is not an array";
         const MaxNumberID = 9223372036854775807;
         const MaxTitleLength = 255;
         const MaxDescriptionLength = 16777215;
